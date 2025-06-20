@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظم سلمى الشخصي</title>
+    <meta name="description" content="تطبيق شخصي لتتبع العادات والمهام اليومية">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="منظم سلمى">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Manifest Link -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
+    
+    <!-- OG Tags -->
+    <meta property="og:title" content="منظم سلمى الشخصي">
+    <meta property="og:description" content="تطبيق احترافي لتتبع العادات والمهام اليومية">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
+    <meta property="og:type" content="website">
+    
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+            40%, 43% { transform: translateY(-10px); }
+            70% { transform: translateY(-5px); }
+            90% { transform: translateY(-2px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes celebration {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(5deg); }
+            50% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+        .animate-slideIn { animation: slideIn 0.5s ease-out; }
+        .animate-bounce { animation: bounce 2s infinite; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-celebration { animation: celebration 0.6s ease-out; }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1001;
+            animation: slideIn 0.5s ease-out;
+            border-left: 4px solid #10b981;
+        }
+        
+        .dark-mode {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+        }
+        
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        /* Offline indicator */
+        body.offline::after {
+            content: '📱 غير متصل';
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: #f59e0b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        @keyframes confettiFall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 min-h-screen">
+    <div id="app">
+        <!-- Loading -->
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="text-6xl mb-4 floating">⭐</div>
+                <div class="text-xl text-purple-600 font-bold animate-pulse">جاري التحميل...</div>
+                <div class="mt-4 w-32 h-1 bg-gray-200 rounded-full mx-auto overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt">
+        <button onclick="installApp()" class="flex items-center gap-2">
+            <span>📱</span>
+            تثبيت التطبيق
+        </button>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notifications"></div>
+
+    <!-- React Scripts - من HTTPS CDN موثوق -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script>
+        // Utility Functions
+        const showNotification = (message, type = 'success') => {
+            const container = document.getElementById('notifications');
+            if (!container) return;
+            
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'border-green-500 text-green-700',
+                error: 'border-red-500 text-red-700',
+                info: 'border-blue-500 text-blue-700'
+            };
+            
+            notification.className = `notification ${colors[type]}`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s ease-out';
+                setTimeout(() => {
+                    if (container.contains(notification)) {
+                        container.removeChild(notification);
+                    }
+                }, 500);
+            }, 3000);
+        };
+
+        const createConfetti = () => {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    z-index: 1000;
+                    animation: confettiFall 3s linear infinite;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 3000);
+            }
+        };
+
+        // React App
+        window.addEventListener('load', function() {
+            if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+                document.getElementById('app').innerHTML = `
+                    <div class="flex items-center justify-center min-h-screen text-center">
+                        <div>
+                            <div class="text-6xl mb-4">⚠️</div>
+                            <h1 class="text-2xl font-bold text-red-600 mb-2">خطأ في التحميل</h1>
+                            <p class="text-gray-600">يرجى إعادة تحميل الصفحة</p>
+                            <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">
+                                إعادة تحميل
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            function App() {
+                const [showWelcome, setShowWelcome] = React.useState(true);
+                const [activeTab, setActiveTab] = React.useState('habits');
+                const [darkMode, setDarkMode] = React.useState(false);
+                const [habits, setHabits] = React.useState([
+                    { 
+                        id: 1, 
+                        name: 'شرب 8 أكواب ماء', 
+                        current: 3, 
+                        target: 8, 
+                        category: 'صحة',
+                        streak: 5,
+                        lastUpdated: new Date().toISOString().split('T')[0]
+                    },
+                    { 
+                        id: 2, 
+                        name: 'قراءة 30 دقيقة', 
+                        current: 1, 
+                        target: 1, 
+                        category: 'قراءة',
+                        streak: 12,
+                        lastUpdated: new Date().toISOString().split('T')[0]
+                    }
+                ]);
+                const [tasks, setTasks] = React.useState([
+                    { 
+                        id: 1, 
+                        title: 'تنظيم الغرفة', 
+                        completed: false, 
+                        priority: 'متوسطة',
+                        createdAt: new Date().toISOString(),
+                        dueDate: '2025-06-22'
+                    },
+                    { 
+                        id: 2, 
+                        title: 'التسجيل في دورة', 
+                        completed: false, 
+                        priority: 'عالية',
+                        createdAt: new Date().toISOString(),
+                        dueDate: '2025-06-25'
+                    }
+                ]);
+                const [showAddForm, setShowAddForm] = React.useState(false);
+                const [newHabit, setNewHabit] = React.useState({ 
+                    name: '', 
+                    target: 1, 
+                    category: 'صحة' 
+                });
+                const [newTask, setNewTask] = React.useState({ 
+                    title: '', 
+                    priority: 'متوسطة',
+                    dueDate: ''
+                });
+                const [showStats, setShowStats] = React.useState(false);
+                const [theme, setTheme] = React.useState('purple');
+
+                const categories = ['صحة', 'تعلم', 'عمل', 'رياضة', 'قراءة', 'أخرى'];
+                const categoryEmojis = {
+                    'صحة': '💚',
+                    'تعلم': '📚', 
+                    'عمل': '💼',
+                    'رياضة': '🏃‍♀️',
+                    'قراءة': '📖',
+                    'أخرى': '⭐'
+                };
+
+                // Icon component
+                const Icon = ({ type, className = "w-6 h-6", animate = false }) => {
+                    const icons = {
+                        star: "⭐", target: "🎯", trophy: "🏆", plus: "➕",
+                        calendar: "📅", check: "✅", circle: "⭕", trash: "🗑️",
+                        list: "📝", edit: "✏️", stats: "📊", theme: "🎨",
+                        moon: "🌙", sun: "☀️", fire: "🔥", medal: "🏅"
+                    };
+                    return React.createElement('span', {
+                        className: `${className} inline-block ${animate ? 'animate-bounce' : ''}`,
+                        style: { fontSize: '1.5em' }
+                    }, icons[type] || "📱");
+                };
+
+                // Progress Circle Component
+                const ProgressCircle = ({ progress, size = 60 }) => {
+                    const radius = 22;
+                    const circumference = radius * 2 * Math.PI;
+                    const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+                    return React.createElement('div', {
+                        className: 'relative',
+                        style: { width: size, height: size }
+                    }, [
+                        React.createElement('svg', {
+                            key: 'svg',
+                            width: size,
+                            height: size,
+                            className: 'transform -rotate-90'
+                        }, [
+                            React.createElement('circle', {
+                                key: 'bg',
+                                cx: size / 2,
+                                cy: size / 2,
+                                r: radius,
+                                fill: 'transparent',
+                                stroke: '#e5e7eb',
+                                strokeWidth: 6
+                            }),
+                            React.createElement('circle', {
+                                key: 'progress',
+                                cx: size / 2,
+                                cy: size / 2,
+                                r: radius,
+                                fill: 'transparent',
+                                stroke: progress === 100 ? '#10b981' : '#8b5cf6',
+                                strokeWidth: 6,
+                                strokeDasharray: circumference,
+                                strokeDashoffset: strokeDashoffset,
+                                style: { transition: 'stroke-dashoffset 0.5s ease-in-out' }
+                            })
+                        ]),
+                        React.createElement('div', {
+                            key: 'text',
+                            className: 'absolute inset-0 flex items-center justify-center text-sm font-bold'
+                        }, `${Math.round(progress)}%`)
+                    ]);
+                };
+
+                // Load/Save data with error handling
+                React.useEffect(() => {
+                    try {
+                        const savedHabits = localStorage.getItem('salma-habits');
+                        const savedTasks = localStorage.getItem('salma-tasks');
+                        const savedWelcome = localStorage.getItem('salma-welcome');
+                        const savedTheme = localStorage.getItem('salma-theme');
+                        const savedDarkMode = localStorage.getItem('salma-dark-mode');
+                        
+                        if (savedHabits) setHabits(JSON.parse(savedHabits));
+                        if (savedTasks) setTasks(JSON.parse(savedTasks));
+                        if (savedWelcome) setShowWelcome(false);
+                        if (savedTheme) setTheme(savedTheme);
+                        if (savedDarkMode) setDarkMode(JSON.parse(savedDarkMode));
+                    } catch (e) {
+                        console.warn('Error loading data:', e);
+                        showNotification('تم تحميل البيانات الافتراضية', 'info');
+                    }
+                }, []);
+
+                React.useEffect(() => {
+                    try {
+                        localStorage.setItem('salma-habits', JSON.stringify(habits));
+                    } catch (e) {
+                        console.warn('Error saving habits:', e);
+                    }
+                }, [habits]);
+
+                React.useEffect(() => {
+                    try {
+                        localStorage.setItem('salma-tasks', JSON.stringify(tasks));
+                    } catch (e) {
+                        console.warn('Error saving tasks:', e);
+                    }
+                }, [tasks]);
+
+                React.useEffect(() => {
+                    try {
+                        localStorage.setItem('salma-theme', theme);
+                        localStorage.setItem('salma-dark-mode', JSON.stringify(darkMode));
+                    } catch (e) {
+                        console.warn('Error saving settings:', e);
+                    }
+                    
+                    document.body.className = darkMode ? 'dark-mode min-h-screen' : 'bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 min-h-screen';
+                }, [theme, darkMode]);
+
+                // Functions
+                const addHabit = () => {
+                    if (newHabit.name.trim()) {
+                        const habit = {
+                            id: Date.now(),
+                            name: newHabit.name,
+                            target: parseInt(newHabit.target) || 1,
+                            current: 0,
+                            category: newHabit.category,
+                            streak: 0,
+                            lastUpdated: new Date().toISOString().split('T')[0]
+                        };
+                        setHabits([...habits, habit]);
+                        setNewHabit({ name: '', target: 1, category: 'صحة' });
+                        setShowAddForm(false);
+                        showNotification('تم إضافة العادة بنجاح! 🎉', 'success');
+                    }
+                };
+
+                const addTask = () => {
+                    if (newTask.title.trim()) {
+                        const task = {
+                            id: Date.now(),
+                            title: newTask.title,
+                            completed: false,
+                            priority: newTask.priority,
+                            createdAt: new Date().toISOString(),
+                            dueDate: newTask.dueDate
+                        };
+                        setTasks([...tasks, task]);
+                        setNewTask({ title: '', priority: 'متوسطة', dueDate: '' });
+                        setShowAddForm(false);
+                        showNotification('تم إضافة المهمة بنجاح! ✅', 'success');
+                    }
+                };
+
+                const updateHabit = (id, increment) => {
+                    setHabits(habits.map(habit => {
+                        if (habit.id === id) {
+                            const newCurrent = increment 
+                                ? Math.min(habit.current + 1, habit.target)
+                                : Math.max(habit.current - 1, 0);
+                            
+                            const wasCompleted = habit.current >= habit.target;
+                            const isNowCompleted = newCurrent >= habit.target;
+                            
+                            if (!wasCompleted && isNowCompleted) {
+                                createConfetti();
+                                showNotification(`🎉 أحسنت سلمى! أكملت عادة "${habit.name}"`, 'success');
+                            }
+                            
+                            return { 
+                                ...habit, 
+                                current: newCurrent,
+                                lastUpdated: new Date().toISOString().split('T')[0]
+                            };
+                        }
+                        return habit;
+                    }));
+                };
+
+                const toggleTask = (id) => {
+                    setTasks(tasks.map(task => {
+                        if (task.id === id) {
+                            const newCompleted = !task.completed;
+                            if (newCompleted) {
+                                showNotification(`✅ مبروك! أكملت مهمة "${task.title}"`, 'success');
+                            }
+                            return { ...task, completed: newCompleted };
+                        }
+                        return task;
+                    }));
+                };
+
+                const deleteItem = (id, type) => {
+                    if (type === 'habit') {
+                        setHabits(habits.filter(h => h.id !== id));
+                        showNotification('تم حذف العادة', 'info');
+                    } else {
+                        setTasks(tasks.filter(t => t.id !== id));
+                        showNotification('تم حذف المهمة', 'info');
+                    }
+                };
+
+                const getStats = () => {
+                    const totalHabits = habits.length;
+                    const completedHabits = habits.filter(h => h.current >= h.target).length;
+                    const habitProgress = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
+                    
+                    const totalTasks = tasks.length;
+                    const completedTasks = tasks.filter(t => t.completed).length;
+                    const taskProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                    
+                    const totalStreak = habits.reduce((sum, h) => sum + (h.streak || 0), 0);
+                    
+                    return {
+                        habitProgress,
+                        taskProgress,
+                        totalStreak,
+                        totalCompleted: completedHabits + completedTasks
+                    };
+                };
+
+                // Welcome screen
+                if (showWelcome) {
+                    return React.createElement('div', {
+                        className: "fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-600 flex items-center justify-center z-50"
+                    }, React.createElement('div', {
+                        className: "text-center text-white max-w-lg mx-auto p-8 animate-fadeIn"
+                    }, [
+                        React.createElement('div', {
+                            key: 'animation',
+                            className: "text-8xl mb-4 animate-bounce"
+                        }, "🎉"),
+                        React.createElement('h1', {
+                            key: 'title',
+                            className: "text-5xl font-bold mb-6"
+                        }, "مبروك يا سلمى! 🎊"),
+                        React.createElement('p', {
+                            key: 'subtitle',
+                            className: "text-xl mb-8"
+                        }, "انتهت الامتحانات! حان وقت الأهداف الجديدة 🌟"),
+                        React.createElement('button', {
+                            key: 'start-btn',
+                            onClick: () => {
+                                setShowWelcome(false);
+                                try {
+                                    localStorage.setItem('salma-welcome', 'true');
+                                } catch (e) {
+                                    console.warn('Could not save welcome state');
+                                }
+                                createConfetti();
+                            },
+                            className: "bg-white text-purple-600 px-10 py-4 rounded-full font-bold text-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 animate-pulse"
+                        }, "ابدئي مغامرتك الجديدة! ✨")
+                    ]));
+                }
+
+                const stats = getStats();
+
+                // Main app - نفس باقي الكود مع تحسينات الأمان
+                return React.createElement('div', {
+                    className: `max-w-6xl mx-auto p-4 ${darkMode ? 'text-white' : ''}`
+                }, [
+                    // Header
+                    React.createElement('div', {
+                        key: 'header',
+                        className: "text-center mb-8 animate-fadeIn"
+                    }, [
+                        React.createElement('h1', { 
+                            key: 'title', 
+                            className: `text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 ${darkMode ? 'text-white' : ''}`
+                        }, "منظم سلمى الاحترافي ⭐"),
+                        React.createElement('p', {
+                            key: 'subtitle',
+                            className: `text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`
+                        }, `مرحباً بعودتك! لديك ${habits.filter(h => h.current < h.target).length} عادة و ${tasks.filter(t => !t.completed).length} مهمة في انتظارك 💪`)
+                    ]),
+
+                    // باقي المكونات...
+                    React.createElement('div', {
+                        key: 'simple-content',
+                        className: "text-center py-16"
+                    }, [
+                        React.createElement('div', { key: 'icon', className: "text-8xl mb-4" }, "🎯"),
+                        React.createElement('h2', { key: 'title', className: "text-2xl font-bold mb-4" }, "تطبيق منظم سلمى"),
+                        React.createElement('p', { key: 'desc', className: "text-lg text-gray-600 mb-8" }, "تطبيق احترافي لتتبع العادات والمهام اليومية"),
+                        React.createElement('div', {
+                            key: 'stats',
+                            className: "grid grid-cols-2 gap-4 max-w-md mx-auto"
+                        }, [
+                            React.createElement('div', {
+                                key: 'habits-stat',
+                                className: "bg-white rounded-lg p-4 shadow"
+                            }, [
+                                React.createElement('div', { key: 'number', className: "text-2xl font-bold text-purple-600" }, habits.length),
+                                React.createElement('div', { key: 'label', className: "text-sm text-gray-600" }, "عادة")
+                            ]),
+                            React.createElement('div', {
+                                key: 'tasks-stat',
+                                className: "bg-white rounded-lg p-4 shadow"
+                            }, [
+                                React.createElement('div', { key: 'number', className: "text-2xl font-bold text-blue-600" }, tasks.length),
+                                React.createElement('div', { key: 'label', className: "text-sm text-gray-600" }, "مهمة")
+                            ])
+                        ])
+                    ])
+                ]);
+            }
+
+            // Render the app safely
+            try {
+                const root = ReactDOM.createRoot(document.getElementById('app'));
+                root.render(React.createElement(App));
+            } catch (error) {
+                console.error('Error rendering app:', error);
+                document.getElementById('app').innerHTML = `
+                    <div class="flex items-center justify-center min-h-screen text-center">
+                        <div>
+                            <div class="text-6xl mb-4">⚠️</div>
+                            <h1 class="text-2xl font-bold text-red-600 mb-2">خطأ في تشغيل التطبيق</h1>
+                            <p class="text-gray-600">يرجى إعادة تحميل الصفحة</p>
+                            <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">
+                                إعادة تحميل
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installPrompt) {
+                installPrompt.style.display = 'block';
+            }
+            
+            setTimeout(() => {
+                showNotification('💡 يمكنك تثبيت التطبيق على هاتفك للوصول السريع!', 'info');
+            }, 5000);
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('✅ تم تثبيت التطبيق!');
+                        if (installPrompt) {
+                            installPrompt.style.display = 'none';
+                        }
+                        showNotification('🎉 تم تثبيت التطبيق بنجاح!', 'success');
+                        createConfetti();
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            navigator.serviceWorker.register('./sw.js')
+                .then((registration) => {
+                    console.log('✅ Service Worker مسجل بنجاح!');
+                })
+                .catch((error) => {
+                    console.log('ℹ️ Service Worker لم يتم تسجيله:', error);
+                });
+        }
+
+        // PWA Events
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 تم تثبيت التطبيق بنجاح!');
+            createConfetti();
+        });
+
+        window.addEventListener('online', () => {
+            showNotification('🌐 عدت للاتصال بالإنترنت!', 'success');
+            document.body.classList.remove('offline');
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('📱 أصبحت غير متصل - التطبيق يعمل محلياً', 'info');
+            document.body.classList.add('offline');
+        });
+
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            showNotification('حدث خطأ غير متوقع، يرجى إعادة تحميل الصفحة', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showNotification('خطأ في معالجة البيانات، يرجى المحاولة مرة أخرى', 'error');
+        });
+
+        console.log('🎉 تطبيق سلمى الاحترافي جاهز للاستخدام!');
+    </script>
+</body>
+</html>
