@@ -12,9 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="منظم سلمى">
     
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -22,19 +19,11 @@
     <link rel="manifest" href="./manifest.json">
     
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Favicon -->
-    <link rel="icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
-    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
-    
-    <!-- OG Tags -->
-    <meta property="og:title" content="منظم سلمى الشخصي">
-    <meta property="og:description" content="تطبيق احترافي لتتبع العادات والمهام اليومية">
-    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png">
-    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E⭐%3C/text%3E%3C/svg%3E">
     
     <style>
         * {
@@ -162,14 +151,6 @@
             font-size: 12px;
             z-index: 1000;
         }
-        
-        @keyframes confettiFall {
-            to { transform: translateY(100vh) rotate(360deg); }
-        }
-        
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(100%); }
-        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 min-h-screen">
@@ -197,7 +178,7 @@
     <!-- Notification Container -->
     <div id="notifications"></div>
 
-    <!-- React Scripts - من HTTPS CDN موثوق -->
+    <!-- React Scripts -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
@@ -205,8 +186,6 @@
         // Utility Functions
         const showNotification = (message, type = 'success') => {
             const container = document.getElementById('notifications');
-            if (!container) return;
-            
             const notification = document.createElement('div');
             const colors = {
                 success: 'border-green-500 text-green-700',
@@ -226,11 +205,7 @@
             
             setTimeout(() => {
                 notification.style.animation = 'fadeOut 0.5s ease-out';
-                setTimeout(() => {
-                    if (container.contains(notification)) {
-                        container.removeChild(notification);
-                    }
-                }, 500);
+                setTimeout(() => container.removeChild(notification), 500);
             }, 3000);
         };
 
@@ -247,7 +222,6 @@
                     top: -10px;
                     z-index: 1000;
                     animation: confettiFall 3s linear infinite;
-                    pointer-events: none;
                 `;
                 document.body.appendChild(confetti);
                 
@@ -259,24 +233,20 @@
             }
         };
 
-        // React App
-        window.addEventListener('load', function() {
-            if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
-                document.getElementById('app').innerHTML = `
-                    <div class="flex items-center justify-center min-h-screen text-center">
-                        <div>
-                            <div class="text-6xl mb-4">⚠️</div>
-                            <h1 class="text-2xl font-bold text-red-600 mb-2">خطأ في التحميل</h1>
-                            <p class="text-gray-600">يرجى إعادة تحميل الصفحة</p>
-                            <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">
-                                إعادة تحميل
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
+        // Add confetti animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confettiFall {
+                to { transform: translateY(100vh) rotate(360deg); }
             }
+            @keyframes fadeOut {
+                to { opacity: 0; transform: translateX(100%); }
+            }
+        `;
+        document.head.appendChild(style);
 
+        // React App - نفس الكود الأصلي مع تحسينات بسيطة
+        window.addEventListener('load', function() {
             function App() {
                 const [showWelcome, setShowWelcome] = React.useState(true);
                 const [activeTab, setActiveTab] = React.useState('habits');
@@ -402,7 +372,7 @@
                     ]);
                 };
 
-                // Load/Save data with error handling
+                // Load/Save data
                 React.useEffect(() => {
                     try {
                         const savedHabits = localStorage.getItem('salma-habits');
@@ -417,35 +387,21 @@
                         if (savedTheme) setTheme(savedTheme);
                         if (savedDarkMode) setDarkMode(JSON.parse(savedDarkMode));
                     } catch (e) {
-                        console.warn('Error loading data:', e);
-                        showNotification('تم تحميل البيانات الافتراضية', 'info');
+                        console.log('Error loading data:', e);
                     }
                 }, []);
 
                 React.useEffect(() => {
-                    try {
-                        localStorage.setItem('salma-habits', JSON.stringify(habits));
-                    } catch (e) {
-                        console.warn('Error saving habits:', e);
-                    }
+                    localStorage.setItem('salma-habits', JSON.stringify(habits));
                 }, [habits]);
 
                 React.useEffect(() => {
-                    try {
-                        localStorage.setItem('salma-tasks', JSON.stringify(tasks));
-                    } catch (e) {
-                        console.warn('Error saving tasks:', e);
-                    }
+                    localStorage.setItem('salma-tasks', JSON.stringify(tasks));
                 }, [tasks]);
 
                 React.useEffect(() => {
-                    try {
-                        localStorage.setItem('salma-theme', theme);
-                        localStorage.setItem('salma-dark-mode', JSON.stringify(darkMode));
-                    } catch (e) {
-                        console.warn('Error saving settings:', e);
-                    }
-                    
+                    localStorage.setItem('salma-theme', theme);
+                    localStorage.setItem('salma-dark-mode', JSON.stringify(darkMode));
                     document.body.className = darkMode ? 'dark-mode min-h-screen' : 'bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 min-h-screen';
                 }, [theme, darkMode]);
 
@@ -575,11 +531,7 @@
                             key: 'start-btn',
                             onClick: () => {
                                 setShowWelcome(false);
-                                try {
-                                    localStorage.setItem('salma-welcome', 'true');
-                                } catch (e) {
-                                    console.warn('Could not save welcome state');
-                                }
+                                localStorage.setItem('salma-welcome', 'true');
                                 createConfetti();
                             },
                             className: "bg-white text-purple-600 px-10 py-4 rounded-full font-bold text-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 animate-pulse"
@@ -589,7 +541,7 @@
 
                 const stats = getStats();
 
-                // Main app - نفس باقي الكود مع تحسينات الأمان
+                // Main app
                 return React.createElement('div', {
                     className: `max-w-6xl mx-auto p-4 ${darkMode ? 'text-white' : ''}`
                 }, [
@@ -608,56 +560,648 @@
                         }, `مرحباً بعودتك! لديك ${habits.filter(h => h.current < h.target).length} عادة و ${tasks.filter(t => !t.completed).length} مهمة في انتظارك 💪`)
                     ]),
 
-                    // باقي المكونات...
+                    // Controls
                     React.createElement('div', {
-                        key: 'simple-content',
-                        className: "text-center py-16"
+                        key: 'controls',
+                        className: "flex flex-wrap justify-center gap-3 mb-8"
                     }, [
-                        React.createElement('div', { key: 'icon', className: "text-8xl mb-4" }, "🎯"),
-                        React.createElement('h2', { key: 'title', className: "text-2xl font-bold mb-4" }, "تطبيق منظم سلمى"),
-                        React.createElement('p', { key: 'desc', className: "text-lg text-gray-600 mb-8" }, "تطبيق احترافي لتتبع العادات والمهام اليومية"),
+                        React.createElement('select', {
+                            key: 'theme-selector',
+                            value: theme,
+                            onChange: (e) => setTheme(e.target.value),
+                            className: `px-4 py-2 rounded-full border-2 border-purple-200 focus:border-purple-500 outline-none transition-all ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'}`
+                        }, [
+                            React.createElement('option', { key: 'purple', value: 'purple' }, '🟣 بنفسجي'),
+                            React.createElement('option', { key: 'pink', value: 'pink' }, '🩷 وردي'),
+                            React.createElement('option', { key: 'blue', value: 'blue' }, '🔵 أزرق')
+                        ]),
+                        React.createElement('button', {
+                            key: 'dark-toggle',
+                            onClick: () => setDarkMode(!darkMode),
+                            className: `px-4 py-2 rounded-full ${darkMode ? 'bg-yellow-500 text-black' : 'bg-gray-800 text-white'} transition-all transform hover:scale-105 flex items-center gap-2`
+                        }, [
+                            Icon({ type: darkMode ? 'sun' : 'moon', key: 'mode-icon' }),
+                            React.createElement('span', { key: 'mode-text' }, darkMode ? 'نهاري' : 'ليلي')
+                        ]),
+                        React.createElement('button', {
+                            key: 'stats-toggle',
+                            onClick: () => setShowStats(!showStats),
+                            className: `px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white transition-all transform hover:scale-105 flex items-center gap-2`
+                        }, [
+                            Icon({ type: 'stats', key: 'stats-icon' }),
+                            React.createElement('span', { key: 'stats-text' }, showStats ? 'إخفاء الإحصائيات' : 'الإحصائيات')
+                        ])
+                    ]),
+
+                    // Stats Panel
+                    showStats && React.createElement('div', {
+                        key: 'stats-panel',
+                        className: "mb-8 animate-slideIn"
+                    }, React.createElement('div', {
+                        className: `glass-effect rounded-2xl p-6 ${darkMode ? 'bg-gray-800/50' : 'bg-white/50'}`
+                    }, [
+                        React.createElement('h2', {
+                            key: 'stats-title',
+                            className: `text-2xl font-bold mb-6 text-center ${darkMode ? 'text-white' : 'text-gray-800'}`
+                        }, "📊 إحصائياتك التفصيلية"),
                         React.createElement('div', {
-                            key: 'stats',
-                            className: "grid grid-cols-2 gap-4 max-w-md mx-auto"
+                            key: 'stats-grid',
+                            className: "grid grid-cols-2 md:grid-cols-4 gap-4"
                         }, [
                             React.createElement('div', {
-                                key: 'habits-stat',
-                                className: "bg-white rounded-lg p-4 shadow"
+                                key: 'progress-card1',
+                                className: "text-center"
                             }, [
-                                React.createElement('div', { key: 'number', className: "text-2xl font-bold text-purple-600" }, habits.length),
-                                React.createElement('div', { key: 'label', className: "text-sm text-gray-600" }, "عادة")
+                                ProgressCircle({ progress: stats.habitProgress, key: 'circle1' }),
+                                React.createElement('h3', { key: 'title1', className: "text-lg font-semibold mt-2" }, "العادات"),
+                                React.createElement('p', { key: 'desc1', className: "text-sm opacity-75" }, `${habits.filter(h => h.current >= h.target).length}/${habits.length}`)
                             ]),
                             React.createElement('div', {
-                                key: 'tasks-stat',
-                                className: "bg-white rounded-lg p-4 shadow"
+                                key: 'progress-card2',
+                                className: "text-center"
                             }, [
-                                React.createElement('div', { key: 'number', className: "text-2xl font-bold text-blue-600" }, tasks.length),
-                                React.createElement('div', { key: 'label', className: "text-sm text-gray-600" }, "مهمة")
+                                ProgressCircle({ progress: stats.taskProgress, key: 'circle2' }),
+                                React.createElement('h3', { key: 'title2', className: "text-lg font-semibold mt-2" }, "المهام"),
+                                React.createElement('p', { key: 'desc2', className: "text-sm opacity-75" }, `${tasks.filter(t => t.completed).length}/${tasks.length}`)
+                            ]),
+                            React.createElement('div', {
+                                key: 'streak-card',
+                                className: "text-center"
+                            }, [
+                                React.createElement('div', {
+                                    key: 'streak-display',
+                                    className: "w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-2"
+                                }, stats.totalStreak),
+                                React.createElement('h3', { key: 'title3', className: "text-lg font-semibold" }, "أيام متتالية"),
+                                React.createElement('p', { key: 'desc3', className: "text-sm opacity-75" }, "🔥 النار مشتعلة!")
+                            ]),
+                            React.createElement('div', {
+                                key: 'completed-card',
+                                className: "text-center"
+                            }, [
+                                React.createElement('div', {
+                                    key: 'completed-display',
+                                    className: "w-16 h-16 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-2"
+                                }, stats.totalCompleted),
+                                React.createElement('h3', { key: 'title4', className: "text-lg font-semibold" }, "مكتملة"),
+                                React.createElement('p', { key: 'desc4', className: "text-sm opacity-75" }, "✅ إنجازات")
                             ])
                         ])
+                    ])),
+
+                    // Tabs
+                    React.createElement('div', {
+                        key: 'tabs',
+                        className: "flex justify-center mb-8"
+                    }, React.createElement('div', {
+                        className: `glass-effect rounded-full p-2 shadow-xl w-full max-w-md ${darkMode ? 'bg-gray-800/50' : 'bg-white/50'}`
+                    }, React.createElement('div', {
+                        className: "grid grid-cols-2 gap-2"
+                    }, [
+                        React.createElement('button', {
+                            key: 'habits-tab',
+                            onClick: () => setActiveTab('habits'),
+                            className: `px-6 py-4 rounded-full font-medium transition-all flex items-center justify-center gap-2 text-sm ${
+                                activeTab === 'habits' 
+                                ? `bg-gradient-to-r ${theme === 'purple' ? 'from-purple-500 to-purple-600' : theme === 'pink' ? 'from-pink-500 to-pink-600' : 'from-blue-500 to-blue-600'} text-white shadow-lg transform scale-105` 
+                                : `${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                            }`
+                        }, [
+                            Icon({ type: 'target', key: 'icon', className: "w-5 h-5" }),
+                            React.createElement('span', { key: 'text' }, "العادات"),
+                            React.createElement('span', { 
+                                key: 'badge',
+                                className: `ml-2 bg-white/20 px-2 py-1 rounded-full text-xs ${activeTab === 'habits' ? 'text-white' : 'text-gray-500'}`
+                            }, habits.filter(h => h.current < h.target).length)
+                        ]),
+                        React.createElement('button', {
+                            key: 'tasks-tab',
+                            onClick: () => setActiveTab('tasks'),
+                            className: `px-6 py-4 rounded-full font-medium transition-all flex items-center justify-center gap-2 text-sm ${
+                                activeTab === 'tasks' 
+                                ? `bg-gradient-to-r ${theme === 'purple' ? 'from-purple-500 to-purple-600' : theme === 'pink' ? 'from-pink-500 to-pink-600' : 'from-blue-500 to-blue-600'} text-white shadow-lg transform scale-105` 
+                                : `${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                            }`
+                        }, [
+                            Icon({ type: 'list', key: 'icon', className: "w-5 h-5" }),
+                            React.createElement('span', { key: 'text' }, "المهام"),
+                            React.createElement('span', { 
+                                key: 'badge',
+                                className: `ml-2 bg-white/20 px-2 py-1 rounded-full text-xs ${activeTab === 'tasks' ? 'text-white' : 'text-gray-500'}`
+                            }, tasks.filter(t => !t.completed).length)
+                        ])
+                    ]))),
+
+                    // Add Button
+                    React.createElement('div', {
+                        key: 'add-section',
+                        className: "text-center mb-8"
+                    }, React.createElement('button', {
+                        onClick: () => setShowAddForm(true),
+                        className: `bg-gradient-to-r ${theme === 'purple' ? 'from-purple-500 to-pink-500' : theme === 'pink' ? 'from-pink-500 to-rose-500' : 'from-blue-500 to-indigo-500'} text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 mx-auto font-semibold text-lg animate-pulse`
+                    }, [
+                        Icon({ type: 'plus', key: 'icon', className: "w-6 h-6" }),
+                        React.createElement('span', { key: 'text' }, activeTab === 'habits' ? '✨ إضافة عادة جديدة' : '📝 إضافة مهمة جديدة'),
+                        React.createElement('div', {
+                            key: 'sparkle',
+                            className: "text-yellow-200 animate-bounce"
+                        }, "✨")
+                    ])),
+
+                    // Add Form Modal
+                    showAddForm && React.createElement('div', {
+                        key: 'modal',
+                        className: "modal",
+                        onClick: (e) => e.target.className.includes('modal') && setShowAddForm(false)
+                    }, React.createElement('div', {
+                        className: `${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4 animate-fadeIn`
+                    }, [
+                        React.createElement('div', {
+                            key: 'modal-header',
+                            className: "text-center mb-6"
+                        }, [
+                            React.createElement('div', { 
+                                key: 'modal-icon',
+                                className: "text-4xl mb-2" 
+                            }, activeTab === 'habits' ? "🎯" : "📝"),
+                            React.createElement('h3', {
+                                key: 'modal-title',
+                                className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`
+                            }, activeTab === 'habits' ? 'عادة جديدة رائعة!' : 'مهمة جديدة مهمة!')
+                        ]),
+                        
+                        activeTab === 'habits' ? 
+                        React.createElement('div', {
+                            key: 'habit-form',
+                            className: "space-y-4"
+                        }, [
+                            React.createElement('div', { key: 'name-group' }, [
+                                React.createElement('label', { 
+                                    key: 'name-label',
+                                    className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                }, "🎯 اسم العادة"),
+                                React.createElement('input', {
+                                    key: 'habit-name',
+                                    type: 'text',
+                                    placeholder: 'مثال: شرب 8 أكواب ماء',
+                                    value: newHabit.name,
+                                    onChange: (e) => setNewHabit({...newHabit, name: e.target.value}),
+                                    className: `w-full border-2 border-purple-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                })
+                            ]),
+                            React.createElement('div', {
+                                key: 'target-category-group',
+                                className: "grid grid-cols-2 gap-4"
+                            }, [
+                                React.createElement('div', { key: 'target-group' }, [
+                                    React.createElement('label', { 
+                                        key: 'target-label',
+                                        className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                    }, "🎯 الهدف اليومي"),
+                                    React.createElement('input', {
+                                        key: 'habit-target',
+                                        type: 'number',
+                                        min: '1',
+                                        max: '100',
+                                        value: newHabit.target,
+                                        onChange: (e) => setNewHabit({...newHabit, target: e.target.value}),
+                                        className: `w-full border-2 border-purple-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                    })
+                                ]),
+                                React.createElement('div', { key: 'category-group' }, [
+                                    React.createElement('label', { 
+                                        key: 'category-label',
+                                        className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                    }, "📂 الفئة"),
+                                    React.createElement('select', {
+                                        key: 'habit-category',
+                                        value: newHabit.category,
+                                        onChange: (e) => setNewHabit({...newHabit, category: e.target.value}),
+                                        className: `w-full border-2 border-purple-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                    }, categories.map(cat => 
+                                        React.createElement('option', { key: cat, value: cat }, `${categoryEmojis[cat]} ${cat}`)
+                                    ))
+                                ])
+                            ])
+                        ]) :
+                        React.createElement('div', {
+                            key: 'task-form',
+                            className: "space-y-4"
+                        }, [
+                            React.createElement('div', { key: 'title-group' }, [
+                                React.createElement('label', { 
+                                    key: 'title-label',
+                                    className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                }, "📝 عنوان المهمة"),
+                                React.createElement('input', {
+                                    key: 'task-title',
+                                    type: 'text',
+                                    placeholder: 'مثال: ترتيب الغرفة',
+                                    value: newTask.title,
+                                    onChange: (e) => setNewTask({...newTask, title: e.target.value}),
+                                    className: `w-full border-2 border-indigo-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                })
+                            ]),
+                            React.createElement('div', {
+                                key: 'priority-date-group',
+                                className: "grid grid-cols-2 gap-4"
+                            }, [
+                                React.createElement('div', { key: 'priority-group' }, [
+                                    React.createElement('label', { 
+                                        key: 'priority-label',
+                                        className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                    }, "⚡ الأولوية"),
+                                    React.createElement('select', {
+                                        key: 'task-priority',
+                                        value: newTask.priority,
+                                        onChange: (e) => setNewTask({...newTask, priority: e.target.value}),
+                                        className: `w-full border-2 border-indigo-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                    }, [
+                                        React.createElement('option', { key: 'low', value: 'منخفضة' }, '🟢 منخفضة'),
+                                        React.createElement('option', { key: 'med', value: 'متوسطة' }, '🟡 متوسطة'),
+                                        React.createElement('option', { key: 'high', value: 'عالية' }, '🔴 عالية')
+                                    ])
+                                ]),
+                                React.createElement('div', { key: 'date-group' }, [
+                                    React.createElement('label', { 
+                                        key: 'date-label',
+                                        className: `block text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-700'} mb-2`
+                                    }, "📅 الموعد النهائي"),
+                                    React.createElement('input', {
+                                        key: 'task-date',
+                                        type: 'date',
+                                        value: newTask.dueDate,
+                                        onChange: (e) => setNewTask({...newTask, dueDate: e.target.value}),
+                                        className: `w-full border-2 border-indigo-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white'}`
+                                    })
+                                ])
+                            ])
+                        ]),
+                        
+                        React.createElement('div', {
+                            key: 'modal-buttons',
+                            className: "flex gap-3 mt-8"
+                        }, [
+                            React.createElement('button', {
+                                key: 'save-btn',
+                                onClick: activeTab === 'habits' ? addHabit : addTask,
+                                className: `flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2`
+                            }, [
+                                Icon({ type: 'check', key: 'save-icon' }),
+                                React.createElement('span', { key: 'save-text' }, 'إضافة بنجاح! ✨')
+                            ]),
+                            React.createElement('button', {
+                                key: 'cancel-btn',
+                                onClick: () => setShowAddForm(false),
+                                className: `px-6 py-3 rounded-xl font-semibold ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} transition-all`
+                            }, 'إلغاء')
+                        ])
+                    ])),
+
+                    // Content Area
+                    React.createElement('div', {
+                        key: 'content',
+                        className: "space-y-6"
+                    }, 
+                        activeTab === 'habits' ? 
+                        // Habits List
+                        React.createElement('div', {
+                            key: 'habits-container',
+                            className: "space-y-4"
+                        }, [
+                            habits.length > 0 && React.createElement('div', {
+                                key: 'habits-header',
+                                className: "text-center mb-6"
+                            }, [
+                                React.createElement('h2', {
+                                    key: 'habits-title',
+                                    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`
+                                }, `🎯 عاداتك اليومية (${habits.length})`),
+                                React.createElement('p', {
+                                    key: 'habits-subtitle',
+                                    className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                                }, `مكتملة اليوم: ${habits.filter(h => h.current >= h.target).length}/${habits.length}`)
+                            ]),
+                            
+                            ...habits.map(habit => {
+                                const progress = Math.min((habit.current / habit.target) * 100, 100);
+                                const isCompleted = habit.current >= habit.target;
+                                
+                                return React.createElement('div', {
+                                    key: habit.id,
+                                    className: `${darkMode ? 'bg-gray-800/50' : 'bg-white'} rounded-2xl p-6 shadow-xl border card-hover animate-fadeIn ${isCompleted ? 'ring-2 ring-green-400' : ''}`
+                                }, [
+                                    React.createElement('div', {
+                                        key: 'habit-header',
+                                        className: "flex items-center justify-between mb-6"
+                                    }, [
+                                        React.createElement('div', {
+                                            key: 'habit-info',
+                                            className: "flex items-center gap-4"
+                                        }, [
+                                            React.createElement('div', {
+                                                key: 'category-badge',
+                                                className: `w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+                                                    habit.category === 'صحة' ? 'bg-green-100 text-green-600' :
+                                                    habit.category === 'تعلم' ? 'bg-blue-100 text-blue-600' :
+                                                    habit.category === 'عمل' ? 'bg-purple-100 text-purple-600' :
+                                                    habit.category === 'رياضة' ? 'bg-orange-100 text-orange-600' :
+                                                    habit.category === 'قراءة' ? 'bg-pink-100 text-pink-600' :
+                                                    'bg-gray-100 text-gray-600'
+                                                }`
+                                            }, categoryEmojis[habit.category]),
+                                            React.createElement('div', { key: 'habit-details' }, [
+                                                React.createElement('h3', {
+                                                    key: 'habit-name',
+                                                    className: `text-xl font-bold ${
+                                                        isCompleted 
+                                                        ? 'text-green-600' 
+                                                        : darkMode ? 'text-white' : 'text-gray-800'
+                                                    }`
+                                                }, habit.name),
+                                                React.createElement('p', {
+                                                    key: 'habit-category',
+                                                    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                                                }, `${habit.category} • ${habit.streak || 0} يوم متتالي`)
+                                            ])
+                                        ]),
+                                        React.createElement('button', {
+                                            key: 'delete-btn',
+                                            onClick: () => deleteItem(habit.id, 'habit'),
+                                            className: `p-3 text-red-500 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 ${darkMode ? 'hover:bg-red-900/20' : ''}`
+                                        }, Icon({ type: 'trash', className: "w-5 h-5" }))
+                                    ]),
+
+                                    React.createElement('div', {
+                                        key: 'habit-progress',
+                                        className: "mb-6"
+                                    }, [
+                                        React.createElement('div', {
+                                            key: 'progress-header',
+                                            className: "flex justify-between items-center mb-3"
+                                        }, [
+                                            React.createElement('span', {
+                                                key: 'progress-label',
+                                                className: `text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                                            }, "التقدم اليوم"),
+                                            React.createElement('span', {
+                                                key: 'progress-percentage',
+                                                className: `text-sm font-bold ${isCompleted ? 'text-green-600' : 'text-purple-600'}`
+                                            }, `${Math.round(progress)}%`)
+                                        ]),
+                                        React.createElement('div', {
+                                            key: 'progress-bar-container',
+                                            className: `w-full bg-gray-200 rounded-full h-3 overflow-hidden ${darkMode ? 'bg-gray-700' : ''}`
+                                        }, React.createElement('div', {
+                                            key: 'progress-bar',
+                                            className: `h-full transition-all duration-500 ${isCompleted ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gradient-to-r from-purple-400 to-pink-500'} ${isCompleted ? 'animate-celebration' : ''}`,
+                                            style: { width: `${progress}%` }
+                                        }))
+                                    ]),
+
+                                    React.createElement('div', {
+                                        key: 'habit-controls',
+                                        className: "flex items-center justify-between"
+                                    }, [
+                                        React.createElement('div', {
+                                            key: 'progress-controls',
+                                            className: "flex items-center gap-4"
+                                        }, [
+                                            React.createElement('button', {
+                                                key: 'minus-btn',
+                                                onClick: () => updateHabit(habit.id, false),
+                                                disabled: habit.current === 0,
+                                                className: `w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-500 text-white flex items-center justify-center hover:from-red-500 hover:to-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xl font-bold shadow-lg transform hover:scale-110 active:scale-95`
+                                            }, "−"),
+                                            React.createElement('div', {
+                                                key: 'progress-display',
+                                                className: "text-center px-6"
+                                            }, [
+                                                React.createElement('div', {
+                                                    key: 'numbers',
+                                                    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} ${isCompleted ? 'text-green-600 animate-pulse' : ''}`
+                                                }, `${habit.current}`),
+                                                React.createElement('div', {
+                                                    key: 'divider',
+                                                    className: `text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+                                                }, `من ${habit.target}`),
+                                                React.createElement('div', {
+                                                    key: 'label',
+                                                    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} font-medium`
+                                                }, habit.target === 1 ? "مرة" : "مرات")
+                                            ]),
+                                            React.createElement('button', {
+                                                key: 'plus-btn',
+                                                onClick: () => updateHabit(habit.id, true),
+                                                disabled: habit.current >= habit.target,
+                                                className: `w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-500 text-white flex items-center justify-center hover:from-green-500 hover:to-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xl font-bold shadow-lg transform hover:scale-110 active:scale-95`
+                                            }, "+")
+                                        ]),
+                                        React.createElement('div', {
+                                            key: 'status-display',
+                                            className: "text-right"
+                                        }, [
+                                            isCompleted ? 
+                                                React.createElement('div', {
+                                                    key: 'completed-status',
+                                                    className: "flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-full animate-bounce"
+                                                }, [
+                                                    React.createElement('span', { key: 'completed-icon', className: "text-xl" }, "🎉"),
+                                                    React.createElement('span', { key: 'completed-text', className: "font-bold" }, "مكتملة!")
+                                                ]) :
+                                                React.createElement('div', {
+                                                    key: 'progress-status',
+                                                    className: `flex items-center gap-2 ${darkMode ? 'text-gray-300 bg-gray-700' : 'text-gray-600 bg-gray-50'} px-4 py-2 rounded-full`
+                                                }, [
+                                                    React.createElement('span', { key: 'progress-icon', className: "text-lg" }, "⏳"),
+                                                    React.createElement('span', { key: 'progress-text', className: "font-medium" }, "في التقدم...")
+                                                ])
+                                        ])
+                                    ])
+                                ]);
+                            }),
+                            
+                            habits.length === 0 && React.createElement('div', {
+                                key: 'empty-habits',
+                                className: "text-center py-16 animate-fadeIn"
+                            }, [
+                                React.createElement('div', { key: 'empty-icon', className: "text-8xl mb-4 animate-bounce" }, "🎯"),
+                                React.createElement('h3', { 
+                                    key: 'empty-title',
+                                    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-600'} mb-2`
+                                }, "ابدئي رحلة العادات!"),
+                                React.createElement('p', { 
+                                    key: 'empty-desc',
+                                    className: `${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-8 text-lg`
+                                }, "كل عادة عظيمة تبدأ بخطوة صغيرة ✨"),
+                                React.createElement('button', {
+                                    key: 'empty-add-btn',
+                                    onClick: () => setShowAddForm(true),
+                                    className: `bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 animate-pulse`
+                                }, "إضافة أول عادة 🌟")
+                            ])
+                        ]) :
+                        // Tasks List  
+                        React.createElement('div', {
+                            key: 'tasks-container',
+                            className: "space-y-4"
+                        }, [
+                            tasks.length > 0 && React.createElement('div', {
+                                key: 'tasks-header',
+                                className: "text-center mb-6"
+                            }, [
+                                React.createElement('h2', {
+                                    key: 'tasks-title',
+                                    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`
+                                }, `📝 مهامك (${tasks.length})`),
+                                React.createElement('p', {
+                                    key: 'tasks-subtitle',
+                                    className: `${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                                }, `مكتملة: ${tasks.filter(t => t.completed).length} • متبقية: ${tasks.filter(t => !t.completed).length}`)
+                            ]),
+                            
+                            ...tasks
+                                .sort((a, b) => {
+                                    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                                    const priorityOrder = { 'عالية': 0, 'متوسطة': 1, 'منخفضة': 2 };
+                                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                                })
+                                .map(task => {
+                                    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+                                    const today = new Date();
+                                    const isOverdue = dueDate && dueDate < today && !task.completed;
+                                    const isDueSoon = dueDate && dueDate > today && (dueDate - today) / (1000 * 60 * 60 * 24) <= 2;
+                                    
+                                    return React.createElement('div', {
+                                        key: task.id,
+                                        className: `${darkMode ? 'bg-gray-800/50' : 'bg-white'} rounded-2xl p-6 shadow-xl border card-hover animate-fadeIn ${
+                                            task.completed ? 'opacity-75 bg-green-50 border-green-200' : 
+                                            isOverdue ? 'border-red-300 bg-red-50' :
+                                            isDueSoon ? 'border-yellow-300 bg-yellow-50' :
+                                            'border-gray-200'
+                                        }`
+                                    }, [
+                                        React.createElement('div', {
+                                            key: 'task-main',
+                                            className: "flex items-start justify-between"
+                                        }, [
+                                            React.createElement('div', {
+                                                key: 'task-content',
+                                                className: "flex items-start gap-4 flex-1"
+                                            }, [
+                                                React.createElement('button', {
+                                                    key: 'toggle-btn',
+                                                    onClick: () => toggleTask(task.id),
+                                                    className: `p-2 rounded-full transition-all transform hover:scale-110 ${
+                                                        task.completed 
+                                                        ? 'text-green-600 bg-green-100 hover:bg-green-200' 
+                                                        : 'text-gray-400 bg-gray-100 hover:bg-gray-200'
+                                                    }`
+                                                }, React.createElement('span', {
+                                                    className: "text-2xl"
+                                                }, task.completed ? "✅" : "⭕")),
+                                                
+                                                React.createElement('div', {
+                                                    key: 'task-details',
+                                                    className: "flex-1 min-w-0"
+                                                }, [
+                                                    React.createElement('h3', {
+                                                        key: 'task-title',
+                                                        className: `text-xl font-bold mb-2 ${
+                                                            task.completed 
+                                                            ? 'text-gray-500 line-through' 
+                                                            : darkMode ? 'text-white' : 'text-gray-800'
+                                                        }`
+                                                    }, task.title),
+                                                    
+                                                    React.createElement('div', {
+                                                        key: 'task-meta',
+                                                        className: "flex flex-wrap items-center gap-3"
+                                                    }, [
+                                                        React.createElement('span', {
+                                                            key: 'priority-badge',
+                                                            className: `px-3 py-1 rounded-full text-xs font-bold border-2 ${
+                                                                task.priority === 'عالية' ? 'bg-red-100 text-red-700 border-red-300' :
+                                                                task.priority === 'متوسطة' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                                                                'bg-green-100 text-green-700 border-green-300'
+                                                            }`
+                                                        }, `${task.priority === 'عالية' ? '🔴' : task.priority === 'متوسطة' ? '🟡' : '🟢'} ${task.priority}`),
+                                                        
+                                                        task.dueDate && React.createElement('span', {
+                                                            key: 'due-date',
+                                                            className: `px-3 py-1 rounded-full text-xs font-bold ${
+                                                                isOverdue ? 'bg-red-100 text-red-700' :
+                                                                isDueSoon ? 'bg-yellow-100 text-yellow-700' :
+                                                                'bg-blue-100 text-blue-700'
+                                                            }`
+                                                        }, `📅 ${new Date(task.dueDate).toLocaleDateString('ar-EG')}`),
+                                                        
+                                                        task.completed && React.createElement('span', {
+                                                            key: 'completed-badge',
+                                                            className: "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 animate-pulse"
+                                                        }, "✅ مكتملة")
+                                                    ])
+                                                ])
+                                            ]),
+                                            
+                                            React.createElement('button', {
+                                                key: 'delete-task-btn',
+                                                onClick: () => deleteItem(task.id, 'task'),
+                                                className: `p-3 text-red-500 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 ${darkMode ? 'hover:bg-red-900/20' : ''}`
+                                            }, Icon({ type: 'trash', className: "w-5 h-5" }))
+                                        ])
+                                    ]);
+                                }),
+                            
+                            tasks.length === 0 && React.createElement('div', {
+                                key: 'empty-tasks',
+                                className: "text-center py-16 animate-fadeIn"
+                            }, [
+                                React.createElement('div', { key: 'empty-icon', className: "text-8xl mb-4 animate-bounce" }, "📝"),
+                                React.createElement('h3', { 
+                                    key: 'empty-title',
+                                    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-600'} mb-2`
+                                }, "نظمي مهامك بذكاء!"),
+                                React.createElement('p', { 
+                                    key: 'empty-desc',
+                                    className: `${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-8 text-lg`
+                                }, "كل إنجاز عظيم يبدأ بقائمة مهام منظمة 📋"),
+                                React.createElement('button', {
+                                    key: 'empty-add-btn',
+                                    onClick: () => setShowAddForm(true),
+                                    className: `bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 animate-pulse`
+                                }, "إضافة أول مهمة 🎯")
+                            ])
+                        ])
+                    ),
+
+                    // Footer
+                    React.createElement('div', {
+                        key: 'footer',
+                        className: `mt-16 text-center py-8 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`
+                    }, [
+                        React.createElement('p', {
+                            key: 'footer-message',
+                            className: `${darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`
+                        }, [
+                            React.createElement('span', {
+                                key: 'congrats',
+                                className: "text-purple-600 font-bold"
+                            }, "أنت تقومين بعمل رائع يا سلمى!"),
+                            React.createElement('br', { key: 'br' }),
+                            "كل يوم تصبحين أقوى وأكثر تنظيماً 💪✨"
+                        ]),
+                        React.createElement('div', {
+                            key: 'footer-stats',
+                            className: "mt-4 text-sm opacity-75"
+                        }, `📱 تطبيق محفوظ محلياً • آخر تحديث: ${new Date().toLocaleDateString('ar-EG')}`)
                     ])
                 ]);
             }
 
-            // Render the app safely
-            try {
-                const root = ReactDOM.createRoot(document.getElementById('app'));
-                root.render(React.createElement(App));
-            } catch (error) {
-                console.error('Error rendering app:', error);
-                document.getElementById('app').innerHTML = `
-                    <div class="flex items-center justify-center min-h-screen text-center">
-                        <div>
-                            <div class="text-6xl mb-4">⚠️</div>
-                            <h1 class="text-2xl font-bold text-red-600 mb-2">خطأ في تشغيل التطبيق</h1>
-                            <p class="text-gray-600">يرجى إعادة تحميل الصفحة</p>
-                            <button onclick="location.reload()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg">
-                                إعادة تحميل
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
+            // Render the app
+            const root = ReactDOM.createRoot(document.getElementById('app'));
+            root.render(React.createElement(App));
         });
 
         // PWA Installation
@@ -667,9 +1211,7 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (installPrompt) {
-                installPrompt.style.display = 'block';
-            }
+            installPrompt.style.display = 'block';
             
             setTimeout(() => {
                 showNotification('💡 يمكنك تثبيت التطبيق على هاتفك للوصول السريع!', 'info');
@@ -682,9 +1224,7 @@
                 deferredPrompt.userChoice.then((result) => {
                     if (result.outcome === 'accepted') {
                         console.log('✅ تم تثبيت التطبيق!');
-                        if (installPrompt) {
-                            installPrompt.style.display = 'none';
-                        }
+                        installPrompt.style.display = 'none';
                         showNotification('🎉 تم تثبيت التطبيق بنجاح!', 'success');
                         createConfetti();
                     }
@@ -694,18 +1234,18 @@
         }
 
         // Service Worker Registration
-        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then((registration) => {
                     console.log('✅ Service Worker مسجل بنجاح!');
                 })
                 .catch((error) => {
-                    console.log('ℹ️ Service Worker لم يتم تسجيله:', error);
+                    console.log('ℹ️ Service Worker سيعمل عند رفع التطبيق على خادم');
                 });
         }
 
         // PWA Events
-        window.addEventListener('appinstalled', () => {
+        window.addEventListener('appinstalled', (e) => {
             console.log('🎉 تم تثبيت التطبيق بنجاح!');
             createConfetti();
         });
@@ -718,17 +1258,6 @@
         window.addEventListener('offline', () => {
             showNotification('📱 أصبحت غير متصل - التطبيق يعمل محلياً', 'info');
             document.body.classList.add('offline');
-        });
-
-        // Error handling
-        window.addEventListener('error', (e) => {
-            console.error('Global error:', e.error);
-            showNotification('حدث خطأ غير متوقع، يرجى إعادة تحميل الصفحة', 'error');
-        });
-
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('Unhandled promise rejection:', e.reason);
-            showNotification('خطأ في معالجة البيانات، يرجى المحاولة مرة أخرى', 'error');
         });
 
         console.log('🎉 تطبيق سلمى الاحترافي جاهز للاستخدام!');
