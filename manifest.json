@@ -1,4 +1,5 @@
 {
+  "id": "salma-organizer",
   "name": "منظم سلمى الشخصي",
   "short_name": "منظم سلمى",
   "description": "تطبيق احترافي لتتبع العادات والمهام اليومية",
@@ -11,6 +12,10 @@
   "lang": "ar",
   "dir": "rtl",
   "categories": ["productivity", "lifestyle"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
     {
       "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2b50.png",
@@ -114,7 +119,7 @@
       "name": "إضافة عادة جديدة",
       "short_name": "عادة جديدة",
       "description": "أضف عادة جديدة بسرعة",
-      "url": "/?action=add-habit",
+      "url": "/salma-organizer/?action=add-habit",
       "icons": [
         {
           "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png",
@@ -127,7 +132,7 @@
       "name": "إضافة مهمة جديدة", 
       "short_name": "مهمة جديدة",
       "description": "أضف مهمة جديدة بسرعة",
-      "url": "/?action=add-task",
+      "url": "/salma-organizer/?action=add-task",
       "icons": [
         {
           "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4dd.png",
